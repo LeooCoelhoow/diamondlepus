@@ -7,20 +7,20 @@ interface ContactSectionProps {
 const channels = [
   {
     key: "instagram" as const,
-    icon: "📸",
+    icon: "",
     label: "Instagram",
     href: (v: string) => `https://instagram.com/${v.replace("@", "")}`,
   },
   {
     key: "whatsapp" as const,
-    icon: "💬",
+    icon: "",
     label: "WhatsApp",
     href: (v: string) =>
       `https://wa.me/${v.replace(/\D/g, "")}`,
   },
   {
     key: "email" as const,
-    icon: "✉️",
+    icon: "",
     label: "E-mail",
     href: (v: string) => `mailto:${v}`,
   },

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Sekuya&display=swap');
 @import "tailwindcss";
 
 
@@ -187,7 +187,7 @@ body {
 }
 
 .brand-title {
-  font-family: "Orbitron", monospace;
+  font-family: "sekuya";
   font-size: clamp(2.5rem, 7vw, 5rem);
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -195,8 +195,8 @@ body {
   background: linear-gradient(
     135deg,
     #ffffff 0%,
-    #c4b5fd 40%,
-    #a78bfa 70%,
+    #ebe7dd 40%,
+    #fdfdfd 70%,
     #ffffff 100%
   );
   -webkit-background-clip: text;

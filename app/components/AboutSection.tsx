@@ -15,7 +15,7 @@ export default function AboutSection({ brand }: AboutSectionProps) {
         </div>
 
         <div className="about-icon" aria-hidden="true">
-          🐇
+          
         </div>
 
         <p className="about-text">{brand.about}</p>

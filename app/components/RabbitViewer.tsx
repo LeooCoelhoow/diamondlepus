@@ -1,22 +1,24 @@
 "use client";
 
-import { Suspense, useRef, useEffect, useState, Component, type ReactNode } from "react";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { OrbitControls, Environment, Center } from "@react-three/drei";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
+import { Suspense, useRef, useEffect, useState, useMemo, Component, type ReactNode } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Environment, Center, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-/* ── Error boundary to catch 404 / load failures ── */
+/* ── Error boundary to catch load failures ── */
 class MeshErrorBoundary extends Component<
   { children: ReactNode; fallback: ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; error: Error | null }
 > {
   constructor(props: { children: ReactNode; fallback: ReactNode }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("[RabbitViewer] Error caught by boundary:", error, errorInfo);
   }
   render() {
     if (this.state.hasError) return this.props.fallback;
@@ -24,7 +26,7 @@ class MeshErrorBoundary extends Component<
   }
 }
 
-/* ── Octahedron fallback (shown while STL loads or on error) ── */
+/* ── Octahedron fallback (shown while loading or on error) ── */
 function FallbackOctahedron() {
   const meshRef = useRef<THREE.Mesh>(null!);
 
@@ -48,64 +50,55 @@ function FallbackOctahedron() {
   );
 }
 
-/* ── Actual STL mesh ── */
+/* ── Actual GLB mesh ── */
 function RabbitMesh() {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const rawGeometry = useLoader(STLLoader, "/logo/rabbit.stl");
+  const meshRef = useRef<THREE.Group>(null!);
+  const { scene } = useGLTF("/logo/LogoMarca3D.glb");
 
-  const [geo, setGeo] = useState<THREE.BufferGeometry | null>(null);
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const cloned = rawGeometry.clone();
-    cloned.computeBoundingBox();
-    const box = cloned.boundingBox!;
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    cloned.translate(-center.x, -center.y, -center.z);
-
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const maxDim = Math.max(size.x, size.y, size.z);
-    setScale(2.2 / maxDim);
-
-    cloned.computeVertexNormals();
-    setGeo(cloned);
-
-    return () => {
-      cloned.dispose();
-    };
-  }, [rawGeometry]);
+  const clonedScene = useMemo(() => {
+    const cloned = scene.clone(true);
+    cloned.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        // Garantir material visível e com double-sided caso o modelo do Blender esteja invertido
+        mesh.material = new THREE.MeshStandardMaterial({
+          color: "#d8d0f5",
+          metalness: 0.6,
+          roughness: 0.25,
+          side: THREE.DoubleSide,
+        });
+      }
+    });
+    return cloned;
+  }, [scene]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.35;
   });
 
-  if (!geo) return null;
-
   return (
-    <mesh ref={meshRef} geometry={geo} scale={scale} castShadow>
-      <meshStandardMaterial
-        color="#c8c0e8"
-        metalness={0.3}
-        roughness={0.35}
-        envMapIntensity={1.5}
-      />
-    </mesh>
+    <group ref={meshRef}>
+      <primitive object={clonedScene} scale={1} />
+    </group>
   );
 }
+
+useGLTF.preload("/logo/LogoMarca3D.glb");
 
 /* ── Scene contents ── */
 function SceneContents() {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 5, 5]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[-3, 3, -2]} intensity={1.0} color="#a78bfa" />
-      <pointLight position={[3, -2, 3]} intensity={0.5} color="#7c6ef2" />
+      <ambientLight intensity={1.2} />
+      <directionalLight position={[5, 8, 5]} intensity={2.0} color="#ffffff" />
+      <directionalLight position={[-5, -2, -3]} intensity={0.8} color="#a78bfa" />
+      <pointLight position={[-3, 3, 2]} intensity={1.5} color="#c4b5fd" />
+      <pointLight position={[3, -2, 2]} intensity={1.0} color="#7c6ef2" />
 
-      {/* ErrorBoundary wraps the STL attempt; Suspense shows octahedron while loading */}
+      {/* ErrorBoundary wraps the GLB attempt; Suspense shows octahedron while loading */}
       <MeshErrorBoundary fallback={<FallbackOctahedron />}>
         <Suspense fallback={<FallbackOctahedron />}>
           <Center>
@@ -120,7 +113,6 @@ function SceneContents() {
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={(Math.PI * 3) / 4}
       />
-      <Environment preset="city" />
     </>
   );
 }
@@ -131,7 +123,12 @@ export default function RabbitViewer() {
     <Canvas
       camera={{ position: [0, 0, 5], fov: 45 }}
       style={{ background: "transparent", width: "100%", height: "100%" }}
-      gl={{ antialias: true, alpha: true }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        powerPreference: "default",
+        preserveDrawingBuffer: false,
+      }}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
       }}
