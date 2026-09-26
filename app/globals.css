@@ -993,12 +993,12 @@ body {
 }
 
 /* ============================================================
-   CATALOG GRID
+   CATALOG FLEX
    ============================================================ */
 
-.catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+.catalog-flex {
+  display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
 }
 

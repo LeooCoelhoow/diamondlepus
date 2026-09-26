@@ -32,7 +32,7 @@ export default function Hero() {
       {/* Brand name */}
       <h1 className="brand-title animate-slide-up">Diamond Lepus</h1>
       <p className="brand-subtitle animate-slide-up animate-delay-1">
-        Impressão 3D com Identidade
+        • Personalidade • Criatividade • Utilidade •
       </p>
 
       {/* 3D Rabbit STL viewer */}
