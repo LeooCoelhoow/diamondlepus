@@ -17,7 +17,7 @@ const Product3DViewer = dynamic(() => import("./Product3DViewer"), {
 
 interface ProductCardProps {
   product: Product;
-  onClick: () => void;
+  onClick: (rect?: DOMRect, activeColor?: "branco" | "preto") => void;
 }
 
 export default function ProductCard({ product, onClick }: ProductCardProps) {
@@ -73,7 +73,8 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       isDragging.current = false;
       return;
     }
-    onClick();
+    const rect = cardRef.current?.getBoundingClientRect();
+    onClick(rect, activeColor);
   };
 
   const priceFormatted = product.price.toLocaleString("pt-BR", {
@@ -90,7 +91,12 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       role="button"
       aria-label={`Ver detalhes de ${product.name}`}
       tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          const rect = cardRef.current?.getBoundingClientRect();
+          onClick(rect, activeColor);
+        }
+      }}
     >
       {/* Depth layers */}
       <div className="product-card-layers">
@@ -120,13 +126,12 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           {/* Info */}
           <div className="card-body">
             <h2 className="card-name">{product.name}</h2>
-            <p className="card-tagline">{product.tagline}</p>
+            {/*<p className="card-tagline">{product.tagline}</p>*/}
 
-            <div className="card-price">
-              A partir de {priceFormatted}
-            </div>
+            <div className="flex justify-between items-center gap-4">
+              <div className="card-price">A partir de {priceFormatted}</div>
 
-            <div className="card-cta">
+              <div className="card-cta">
               <span>Ver detalhes</span>
               <svg
                 className="card-cta-arrow"
@@ -142,6 +147,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
               >
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
+            </div>
             </div>
           </div>
         </div>

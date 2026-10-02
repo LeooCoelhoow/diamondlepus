@@ -9,8 +9,14 @@ interface ProductCatalogProps {
   products: Product[];
 }
 
+interface ModalState {
+  product: Product;
+  originRect?: DOMRect;
+  initialColor?: "branco" | "preto";
+}
+
 export default function ProductCatalog({ products }: ProductCatalogProps) {
-  const [openProduct, setOpenProduct] = useState<Product | null>(null);
+  const [modalState, setModalState] = useState<ModalState | null>(null);
 
   return (
     <>
@@ -19,15 +25,23 @@ export default function ProductCatalog({ products }: ProductCatalogProps) {
           <ProductCard
             key={product.id}
             product={product}
-            onClick={() => setOpenProduct(product)}
+            onClick={(rect, activeColor) =>
+              setModalState({
+                product,
+                originRect: rect,
+                initialColor: activeColor,
+              })
+            }
           />
         ))}
       </div>
 
-      {openProduct && (
+      {modalState && (
         <ProductModal
-          product={openProduct}
-          onClose={() => setOpenProduct(null)}
+          product={modalState.product}
+          originRect={modalState.originRect}
+          initialColor={modalState.initialColor}
+          onClose={() => setModalState(null)}
         />
       )}
     </>
