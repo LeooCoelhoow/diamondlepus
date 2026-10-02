@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import type { Product } from "../data/products";
 
@@ -42,6 +43,9 @@ export default function ProductModal({
     if (isClosing) return;
     setIsClosing(true);
 
+    document.documentElement.classList.add("modal-closing");
+    document.body.classList.add("modal-closing");
+
     const panel = panelRef.current;
     const overlay = overlayRef.current;
 
@@ -68,7 +72,9 @@ export default function ProductModal({
         overlay.style.opacity = "0";
       }
 
-      setTimeout(onClose, 340);
+      setTimeout(() => {
+        onClose();
+      }, 340);
     } else {
       if (panel) {
         panel.style.transition = "transform 0.25s ease, opacity 0.25s ease";
@@ -79,7 +85,9 @@ export default function ProductModal({
         overlay.style.transition = "opacity 0.25s ease";
         overlay.style.opacity = "0";
       }
-      setTimeout(onClose, 250);
+      setTimeout(() => {
+        onClose();
+      }, 250);
     }
   }, [isClosing, originRect, onClose]);
 
@@ -117,6 +125,8 @@ export default function ProductModal({
     return () => {
       document.documentElement.classList.remove("modal-locked");
       document.body.classList.remove("modal-locked");
+      document.documentElement.classList.remove("modal-closing");
+      document.body.classList.remove("modal-closing");
       document.documentElement.style.overflow = originalHtmlOverflow;
       document.body.style.overflow = originalBodyOverflow;
       document.body.style.paddingRight = originalBodyPaddingRight;
@@ -194,7 +204,9 @@ export default function ProductModal({
     }. Poderia me passar mais informações para finalizarmos o pedido?`
   );
 
-  return (
+  if (typeof window === "undefined") return null;
+
+  return createPortal(
     <div
       ref={overlayRef}
       className="modal-overlay"
@@ -413,6 +425,7 @@ export default function ProductModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
