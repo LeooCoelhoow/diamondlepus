@@ -22,7 +22,7 @@ export default function Home() {
           <div className="section">
             <div className="section-header">
               <p className="section-label">Catálogo</p>
-              <h2 className="section-title">Nossos Produtos</h2>
+              <h2 className="section-title"></h2>
               <div className="section-divider" />
             </div>
 

@@ -15,7 +15,7 @@
   /* Core palette */
   --bg-deep: #0d0e1a;
   --bg-base: #12131f;
-  --bg-surface: #191a2e;
+  --bg-surface: #131641;
   --bg-elevated: #1f2035;
 
   /* Glass */
@@ -27,7 +27,7 @@
 
   /* Accent — lilac/purple (inspired by the rabbit's eye) */
   --accent: #ffffff;
-  --accent-dim: #7c6ef2;
+  --accent-dim: #9a9aa7;
   --accent-glow: rgba(159, 156, 185, 0.35);
   --accent-glow-strong: rgba(212, 209, 221, 0.918);
 
@@ -309,7 +309,7 @@ body {
   position: relative;
   z-index: 1;
   padding: 5rem 2rem;
-  max-width: 1200px;
+  max-width: 75%;
   margin: 0 auto;
 }
 
@@ -328,7 +328,7 @@ body {
 }
 
 .section-title {
-  font-family: "Orbitron", monospace;
+  font-family: "Lily Script One", monospace;
   font-size: clamp(1.6rem, 4vw, 2.5rem);
   font-weight: 700;
   color: var(--text-primary);
@@ -805,7 +805,7 @@ body.modal-locked:not(.modal-closing) .particle-canvas {
 .modal-panel {
   position: relative;
   width: 100%;
-  max-width: 980px;
+  max-width: 75%;
   max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
